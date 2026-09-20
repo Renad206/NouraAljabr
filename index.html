@@ -946,6 +946,15 @@ th{
 
             </button>
 
+
+            <button
+                class="btn danger"
+                onclick="deleteAllRecords()">
+
+                🗑️ حذف جميع السجلات
+
+            </button>
+
         </div>
 
     </div>
@@ -1063,7 +1072,8 @@ import {
     doc,
     setDoc,
     getDoc,
-    serverTimestamp
+    serverTimestamp,
+    deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -1546,6 +1556,48 @@ function renderAdmin() {
         `)
         .join("");
 }
+
+/* =========================================================
+   حذف جميع السجلات الحالية
+========================================================= */
+
+window.deleteAllRecords = async function() {
+    if (!records.length) {
+        toast("لا توجد سجلات للحذف.");
+        return;
+    }
+
+    if (!confirm("هل أنتِ متأكدة من حذف جميع السجلات الحالية؟ لا يمكن التراجع عن هذا الإجراء.")) {
+        return;
+    }
+
+    try {
+        const snapshot = await getDocs(collection(db, RECORDS_COLLECTION));
+
+        let batch = writeBatch(db);
+        let count = 0;
+
+        for (const item of snapshot.docs) {
+            batch.delete(item.ref);
+            count++;
+
+            if (count === 450) {
+                await batch.commit();
+                batch = writeBatch(db);
+                count = 0;
+            }
+        }
+
+        if (count > 0) {
+            await batch.commit();
+        }
+
+        toast("تم حذف جميع السجلات 🗑️");
+    } catch (error) {
+        console.error("Delete all records error:", error);
+        toast("حدث خطأ أثناء الحذف");
+    }
+};
 
 /* =========================================================
    أسبوع جديد - أرشفة ثم حذف السجلات الحالية من Firestore
