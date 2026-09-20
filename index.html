@@ -1,0 +1,2350 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مؤشر التميز المدرسي | مدرسة نورة الجبر</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --bg:#050b14;
+    --bg2:#091525;
+    --card:#0d1b2b;
+    --card2:#10243a;
+    --gold:#f4c95d;
+    --cyan:#35d8ff;
+    --green:#35e69a;
+    --purple:#9b7cff;
+    --red:#ff5d6c;
+    --white:#f7f9fc;
+    --muted:#8ea1b6;
+    --line:rgba(255,255,255,.09);
+}
+
+body{
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+    background:
+        radial-gradient(circle at 80% 0%,rgba(53,216,255,.12),transparent 25%),
+        radial-gradient(circle at 10% 100%,rgba(155,124,255,.12),transparent 30%),
+        var(--bg);
+    color:var(--white);
+    min-height:100vh;
+}
+
+/* NAV */
+
+.navbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:70px;
+    padding:0 35px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:rgba(5,11,20,.88);
+    backdrop-filter:blur(18px);
+    border-bottom:1px solid var(--line);
+}
+
+.logo{
+    font-size:21px;
+    font-weight:900;
+}
+
+.logo span{
+    color:var(--gold);
+}
+
+.nav{
+    display:flex;
+    gap:8px;
+}
+
+.nav button{
+    border:1px solid var(--line);
+    background:transparent;
+    color:white;
+    padding:10px 17px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.nav button:hover{
+    border-color:var(--cyan);
+    background:rgba(53,216,255,.07);
+}
+
+/* GENERAL */
+
+.container{
+    width:min(1250px,94%);
+    margin:auto;
+    padding:35px 0 80px;
+}
+
+.screen{
+    display:none;
+}
+
+.screen.active{
+    display:block;
+}
+
+.hero{
+    text-align:center;
+    padding:40px 10px;
+}
+
+.hero h1{
+    font-size:clamp(32px,5vw,62px);
+    font-weight:1000;
+    background:linear-gradient(
+        90deg,
+        var(--gold),
+        white,
+        var(--cyan)
+    );
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.hero p{
+    margin-top:12px;
+    color:var(--muted);
+    font-size:16px;
+}
+
+/* CARDS */
+
+.panel{
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.055),
+            rgba(255,255,255,.018)
+        );
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:25px;
+    margin-bottom:22px;
+    box-shadow:0 20px 60px rgba(0,0,0,.22);
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+
+.field label{
+    font-weight:800;
+}
+
+select{
+    width:100%;
+    padding:15px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:#071422;
+    color:white;
+    outline:none;
+    font-size:15px;
+}
+
+select:focus{
+    border-color:var(--cyan);
+}
+
+/* CRITERIA */
+
+.criteria{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+    margin-top:12px;
+}
+
+.criterion{
+    position:relative;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    padding:17px;
+    border:1px solid var(--line);
+    border-radius:15px;
+    background:#081625;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.criterion:hover{
+    transform:translateY(-2px);
+    border-color:rgba(53,216,255,.6);
+}
+
+.criterion input{
+    accent-color:var(--cyan);
+    margin-top:4px;
+}
+
+/* SCORE */
+
+.score{
+    margin-top:20px;
+    padding:20px;
+    border-radius:18px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(53,216,255,.08),
+            rgba(244,201,93,.06)
+        );
+    border:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.score small{
+    color:var(--muted);
+}
+
+.score strong{
+    display:block;
+    margin-top:5px;
+    font-size:36px;
+    color:var(--cyan);
+}
+
+/* BUTTONS */
+
+.actions{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    border:1px solid var(--line);
+    background:#11253a;
+    color:white;
+    padding:13px 21px;
+    border-radius:13px;
+    cursor:pointer;
+    font-weight:800;
+}
+
+.btn.primary{
+    background:linear-gradient(135deg,var(--gold),#ffe49a);
+    color:#111;
+    border:none;
+}
+
+.btn.danger{
+    background:rgba(255,93,108,.1);
+    color:#ff8993;
+}
+
+/* DASHBOARD STATS */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.stat{
+    padding:23px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:20px;
+}
+
+.stat-title{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.stat-value{
+    margin-top:7px;
+    font-size:31px;
+    font-weight:1000;
+}
+
+/* COMPETITION */
+
+.competition-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+}
+
+.competition-title h2{
+    font-size:25px;
+}
+
+.live{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    color:var(--green);
+    font-size:13px;
+}
+
+.live-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 12px var(--green);
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    50%{
+        opacity:.35;
+        transform:scale(.7);
+    }
+}
+
+/* RANK */
+
+.rank-list{
+    display:flex;
+    flex-direction:column;
+    gap:13px;
+}
+
+.rank{
+    display:grid;
+    grid-template-columns:65px 100px 1fr 90px;
+    gap:15px;
+    align-items:center;
+    padding:17px;
+    border-radius:18px;
+    background:#091725;
+    border:1px solid var(--line);
+    transition:.3s;
+}
+
+.rank:hover{
+    transform:translateX(-5px);
+}
+
+.rank.first{
+    border-color:rgba(244,201,93,.6);
+    background:
+        linear-gradient(
+            90deg,
+            rgba(244,201,93,.12),
+            #091725
+        );
+}
+
+.rank.second{
+    border-color:rgba(200,210,220,.35);
+}
+
+.rank.third{
+    border-color:rgba(205,145,80,.35);
+}
+
+.medal{
+    font-size:31px;
+    text-align:center;
+}
+
+.class-name{
+    font-size:21px;
+    font-weight:1000;
+}
+
+.rank-bar{
+    height:18px;
+    background:#16283a;
+    border-radius:30px;
+    overflow:hidden;
+}
+
+.rank-fill{
+    height:100%;
+    border-radius:30px;
+    background:
+        linear-gradient(
+            90deg,
+            var(--purple),
+            var(--cyan)
+        );
+    transition:width .7s ease;
+    box-shadow:0 0 15px rgba(53,216,255,.2);
+}
+
+.rank.first .rank-fill{
+    background:
+        linear-gradient(
+            90deg,
+            #d89b26,
+            var(--gold),
+            #fff0a8
+        );
+}
+
+.points{
+    text-align:left;
+    font-size:20px;
+    font-weight:1000;
+}
+
+/* CLASS CARDS */
+
+.class-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:17px;
+    margin-top:25px;
+}
+
+.class-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:20px;
+}
+
+.class-header{
+    display:flex;
+    justify-content:space-between;
+}
+
+.class-header strong{
+    font-size:22px;
+}
+
+.class-percent{
+    color:var(--cyan);
+    font-weight:1000;
+}
+
+.mini-bar{
+    height:9px;
+    background:#172a3e;
+    border-radius:20px;
+    margin:18px 0;
+    overflow:hidden;
+}
+
+.mini-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--purple),var(--cyan));
+    border-radius:20px;
+    transition:.5s;
+}
+
+.class-meta{
+    display:flex;
+    justify-content:space-between;
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* ACTIVITY */
+
+.activity{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.activity-item{
+    padding:12px 14px;
+    border-radius:12px;
+    background:#081625;
+    border:1px solid var(--line);
+}
+
+.activity-item span{
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* TABLE */
+
+.table-wrap{
+    overflow:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,
+td{
+    padding:14px;
+    text-align:right;
+    border-bottom:1px solid var(--line);
+}
+
+th{
+    color:var(--gold);
+}
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:999;
+    background:#11283d;
+    border:1px solid var(--cyan);
+    border-radius:14px;
+    padding:14px 23px;
+    display:none;
+    box-shadow:0 10px 40px rgba(0,0,0,.4);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .class-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .rank{
+        grid-template-columns:50px 80px 1fr 70px;
+    }
+}
+
+@media(max-width:650px){
+
+    .navbar{
+        height:auto;
+        padding:15px;
+        flex-direction:column;
+    }
+
+    .nav{
+        width:100%;
+    }
+
+    .nav button{
+        flex:1;
+    }
+
+    .form-grid,
+    .criteria,
+    .stats,
+    .class-grid{
+        grid-template-columns:1fr;
+    }
+
+    .rank{
+        grid-template-columns:45px 70px 1fr;
+    }
+
+    .points{
+        display:none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        مؤشر <span>التميز المدرسي</span>
+    </div>
+
+    <div class="nav">
+
+        <button onclick="showScreen('teacher')">
+            👩🏻‍🏫 تسجيل المعلمات
+        </button>
+
+        <button onclick="showScreen('display')">
+            🏆 شاشة المنافسة
+        </button>
+
+        <button onclick="showScreen('admin')">
+            ⚙️ الإدارة
+        </button>
+
+    </div>
+
+</nav>
+
+
+<div class="container">
+
+<!-- ==================================================
+     TEACHER
+================================================== -->
+
+<section id="teacher" class="screen active">
+
+    <div class="hero">
+
+        <h1>
+            مؤشر التميز المدرسي
+        </h1>
+
+        <p>
+            سجلي إنجاز الفصل وشاركي في رفع رصيد فصلك
+        </p>
+
+    </div>
+
+
+    <div class="panel">
+
+        <div class="form-grid">
+
+            <div class="field">
+
+                <label>
+                    اسم المعلمة *
+                </label>
+
+                <select id="teacherName">
+
+                    <option value="">
+                        اختاري اسم المعلمة
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    الفصل *
+                </label>
+
+                <select id="teacherClass">
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <div class="field" style="margin-top:25px">
+
+            <label>
+                المعيار *
+            </label>
+
+            <p style="
+                color:var(--muted);
+                font-size:13px;
+                margin-top:3px;
+            ">
+                كل تسجيل للمعلمة يضيف نقطة جديدة للفصل
+            </p>
+
+            <div id="criteria"
+                 class="criteria">
+
+            </div>
+
+        </div>
+
+
+        <div class="score">
+
+            <div>
+
+                <small>
+                    رصيد الفصل الحالي
+                </small>
+
+                <strong id="currentPoints">
+                    0
+                </strong>
+
+            </div>
+
+            <div>
+                نقطة
+            </div>
+
+        </div>
+
+
+        <div class="actions">
+
+            <button
+                class="btn primary"
+                onclick="submitEntry()">
+
+                ✨ تسجيل الإنجاز
+
+            </button>
+
+            <button
+                class="btn"
+                onclick="clearForm()">
+
+                مسح
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h3 style="margin-bottom:15px">
+            آخر تسجيلات المعلمة
+        </h3>
+
+        <div id="teacherHistory">
+            اختاري اسم المعلمة.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     DISPLAY
+================================================== -->
+
+<section id="display" class="screen">
+
+    <div class="hero">
+
+        <h1>
+            🏆 منافسة التميز المدرسي
+        </h1>
+
+        <p>
+            أي إنجاز = نقطة جديدة للفصل
+        </p>
+
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat">
+
+            <div class="stat-title">
+                إجمالي الإنجازات
+            </div>
+
+            <div
+                class="stat-value"
+                id="totalPoints">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-title">
+                الفصول المشاركة
+            </div>
+
+            <div
+                class="stat-value"
+                id="started">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-title">
+                المتصدر
+            </div>
+
+            <div
+                class="stat-value"
+                id="leader">
+                —
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-title">
+                إنجازات اليوم
+            </div>
+
+            <div
+                class="stat-value"
+                id="todayPoints">
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- LEADERBOARD -->
+
+    <div class="panel">
+
+        <div class="competition-title">
+
+            <h2>
+                🔥 لوحة المنافسة
+            </h2>
+
+            <div class="live">
+
+                <span class="live-dot"></span>
+
+                LIVE
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="rankList"
+            class="rank-list">
+
+        </div>
+
+    </div>
+
+
+    <!-- CLASS CARDS -->
+
+    <div class="panel">
+
+        <div class="competition-title">
+
+            <h2>
+                📊 أداء جميع الفصول
+            </h2>
+
+        </div>
+
+
+        <div
+            id="classGrid"
+            class="class-grid">
+
+        </div>
+
+    </div>
+
+
+    <!-- RECENT -->
+
+    <div class="panel">
+
+        <div class="competition-title">
+
+            <h2>
+                ⚡ آخر الإنجازات
+            </h2>
+
+        </div>
+
+
+        <div
+            id="activity"
+            class="activity">
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     ADMIN
+================================================== -->
+
+<section id="admin" class="screen">
+
+    <div class="hero">
+
+        <h1>
+            لوحة الإدارة
+        </h1>
+
+        <p>
+            متابعة النتائج وإدارة الأسبوع
+        </p>
+
+    </div>
+
+
+    <div class="panel">
+
+        <div class="actions">
+
+            <button
+                class="btn"
+                onclick="downloadCSV()">
+
+                📥 تصدير Excel
+
+            </button>
+
+
+            <button
+                class="btn"
+                onclick="downloadJSON()">
+
+                💾 نسخة احتياطية
+
+            </button>
+
+
+            <button
+                class="btn danger"
+                onclick="newWeek()">
+
+                🔄 بدء أسبوع جديد
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h2 style="margin-bottom:20px">
+            ترتيب الفصول
+        </h2>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            الترتيب
+                        </th>
+
+                        <th>
+                            الفصل
+                        </th>
+
+                        <th>
+                            النقاط
+                        </th>
+
+                        <th>
+                            النسبة
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="adminRows">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h2 style="margin-bottom:20px">
+            سجل جميع العمليات
+        </h2>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            المعلمة
+                        </th>
+
+                        <th>
+                            الفصل
+                        </th>
+
+                        <th>
+                            المعيار
+                        </th>
+
+                        <th>
+                            الوقت
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="logRows">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+</div>
+
+
+<div id="toast" class="toast"></div>
+
+
+<script>
+
+/* =========================================================
+   أسماء المعلمات
+========================================================= */
+
+const TEACHERS = [
+
+    "فاطمه الملحم",
+    "نهى المسلم",
+    "آمنه الدهلي",
+    "أشواق بوعنز",
+    "إيمان الأحمد",
+    "إيمان الباروت",
+    "إيمان الحزبية",
+    "بدرية بالحارث",
+    "حمدة الشمري",
+    "حنان الهاهود",
+    "رجاء الليلي",
+    "سهام الحربي",
+    "عزيزة الربيع",
+    "منى العبدالقادر",
+    "نورة السعيد",
+    "نورة العقال",
+    "نورة القرني",
+    "نوف الماص",
+    "هيفاء الحماد",
+    "هيفاء السعد",
+    "أسماء السويلم",
+    "هلاله العنزي",
+    "ساره العتيبي",
+    "جوهره الزيد",
+    "عهود بوشقراء",
+    "بدرية المطيري",
+    "غدير الدوسري",
+    "فاطمة الفضيل"
+
+];
+
+
+/* =========================================================
+   الفصول
+========================================================= */
+
+const CLASSES = [
+
+    "1/1",
+    "1/2",
+    "1/3",
+
+    "2/1",
+    "2/2",
+    "2/3",
+
+    "3/1",
+    "3/2",
+    "3/3"
+
+];
+
+
+/* =========================================================
+   المعايير
+========================================================= */
+
+const CRITERIA = [
+
+    "النظافة (الفصل + الشخصية)",
+
+    "الانضباط (عدم الغياب)",
+
+    "الحضور قبل الاصطفاف الصباحي",
+
+    "ترديد النشيد الوطني",
+
+    "الالتزام بالزي المدرسي والمظهر العام",
+
+    "سلوكيات إيجابية (التعاون - الاحترام - المبادرة)",
+
+    "الإذاعة الصباحية (مسابقة أجمل إذاعة)",
+
+    "أفكار إبداعية داخل الفصل (مسابقة أجمل فصل)"
+
+];
+
+
+/* =========================================================
+   التخزين
+========================================================= */
+
+const RECORDS_KEY =
+    "noura_jabr_competition_records_v1";
+
+const ARCHIVE_KEY =
+    "noura_jabr_competition_archive_v1";
+
+
+let records = loadRecords();
+
+
+function loadRecords(){
+
+    try{
+
+        const data =
+            JSON.parse(
+                localStorage.getItem(
+                    RECORDS_KEY
+                )
+            );
+
+        return Array.isArray(data)
+            ? data
+            : [];
+
+    }catch{
+
+        return [];
+
+    }
+
+}
+
+
+function saveRecords(){
+
+    localStorage.setItem(
+        RECORDS_KEY,
+        JSON.stringify(records)
+    );
+
+}
+
+
+function getArchive(){
+
+    try{
+
+        return JSON.parse(
+            localStorage.getItem(
+                ARCHIVE_KEY
+            )
+        ) || [];
+
+    }catch{
+
+        return [];
+
+    }
+
+}
+
+
+/* =========================================================
+   تشغيل
+========================================================= */
+
+function setup(){
+
+    const teacherSelect =
+        document.getElementById(
+            "teacherName"
+        );
+
+
+    teacherSelect.innerHTML =
+
+        `<option value="">
+            اختاري اسم المعلمة
+        </option>` +
+
+        TEACHERS.map(
+
+            (name,index)=>
+
+            `<option value="${escapeHTML(name)}">
+                ${index+1}. ${escapeHTML(name)}
+            </option>`
+
+        ).join("");
+
+
+    document.getElementById(
+        "teacherClass"
+    ).innerHTML =
+
+        CLASSES.map(
+
+            c =>
+
+            `<option value="${c}">
+                ${c}
+            </option>`
+
+        ).join("");
+
+
+    document.getElementById(
+        "criteria"
+    ).innerHTML =
+
+        CRITERIA.map(
+
+            (criterion,index)=>
+
+            `
+            <label class="criterion">
+
+                <input
+                    type="radio"
+                    name="criterion"
+                    value="${escapeHTML(criterion)}"
+                >
+
+                <span>
+                    ${index+1}.
+                    ${escapeHTML(criterion)}
+                </span>
+
+            </label>
+            `
+
+        ).join("");
+
+
+    document
+        .getElementById("teacherClass")
+        .addEventListener(
+            "change",
+            updateTeacherScore
+        );
+
+
+    document
+        .getElementById("teacherName")
+        .addEventListener(
+            "change",
+            renderTeacherHistory
+        );
+
+
+    render();
+
+}
+
+
+/* =========================================================
+   التنقل
+========================================================= */
+
+function showScreen(id){
+
+    document
+        .querySelectorAll(".screen")
+        .forEach(
+            screen =>
+                screen.classList.remove("active")
+        );
+
+
+    document
+        .getElementById(id)
+        .classList.add("active");
+
+
+    render();
+
+}
+
+
+/* =========================================================
+   تسجيل
+========================================================= */
+
+function submitEntry(){
+
+    const teacher =
+        document.getElementById(
+            "teacherName"
+        ).value;
+
+
+    const className =
+        document.getElementById(
+            "teacherClass"
+        ).value;
+
+
+    const selected =
+        document.querySelector(
+            'input[name="criterion"]:checked'
+        );
+
+
+    if(!teacher){
+
+        toast("اختاري اسم المعلمة");
+
+        return;
+
+    }
+
+
+    if(!selected){
+
+        toast("اختاري معيارًا واحدًا");
+
+        return;
+
+    }
+
+
+    /*
+       لا يوجد منع للتكرار.
+
+       نفس المعيار يستطيع تسجيله:
+       أكثر من معلمة
+       وأكثر من مرة
+
+       وكل تسجيل = نقطة جديدة.
+    */
+
+
+    records.push({
+
+        id:
+            Date.now() +
+            "-" +
+            Math.random(),
+
+        teacherName:
+            teacher,
+
+        className:
+            className,
+
+        criterion:
+            selected.value,
+
+        createdAt:
+            new Date().toISOString()
+
+    });
+
+
+    saveRecords();
+
+
+    toast(
+        `تمت إضافة نقطة للفصل ${className} 🔥`
+    );
+
+
+    clearForm();
+
+
+    render();
+
+}
+
+
+/* =========================================================
+   نقاط الفصل
+========================================================= */
+
+function getClassPoints(className){
+
+    return records.filter(
+
+        record =>
+            record.className === className
+
+    ).length;
+
+}
+
+
+/* =========================================================
+   نسبة البار
+   البار يقارن كل فصل بأعلى فصل
+========================================================= */
+
+function getMaxPoints(){
+
+    return Math.max(
+
+        0,
+
+        ...CLASSES.map(
+            getClassPoints
+        )
+
+    );
+
+}
+
+
+function getBarPercentage(points){
+
+    const max =
+        getMaxPoints();
+
+
+    if(max === 0){
+
+        return 0;
+
+    }
+
+
+    return Math.round(
+        (points / max) * 100
+    );
+
+}
+
+
+/* =========================================================
+   نقاط اليوم
+========================================================= */
+
+function isToday(date){
+
+    const d =
+        new Date(date);
+
+    const today =
+        new Date();
+
+
+    return (
+
+        d.getFullYear() ===
+        today.getFullYear()
+
+        &&
+
+        d.getMonth() ===
+        today.getMonth()
+
+        &&
+
+        d.getDate() ===
+        today.getDate()
+
+    );
+
+}
+
+
+/* =========================================================
+   تحديث
+========================================================= */
+
+function render(){
+
+    renderTeacher();
+
+    renderDashboard();
+
+    renderAdmin();
+
+}
+
+
+/* =========================================================
+   واجهة المعلمة
+========================================================= */
+
+function renderTeacher(){
+
+    updateTeacherScore();
+
+    renderTeacherHistory();
+
+}
+
+
+function updateTeacherScore(){
+
+    const className =
+        document.getElementById(
+            "teacherClass"
+        ).value;
+
+
+    const points =
+        getClassPoints(
+            className
+        );
+
+
+    document.getElementById(
+        "currentPoints"
+    ).textContent =
+        points;
+
+}
+
+
+function renderTeacherHistory(){
+
+    const teacher =
+        document.getElementById(
+            "teacherName"
+        ).value;
+
+
+    const box =
+        document.getElementById(
+            "teacherHistory"
+        );
+
+
+    if(!teacher){
+
+        box.innerHTML =
+            "اختاري اسم المعلمة لعرض آخر تسجيلاتها.";
+
+        return;
+
+    }
+
+
+    const list =
+        records
+        .filter(
+            r =>
+                r.teacherName === teacher
+        )
+        .slice()
+        .reverse()
+        .slice(0,10);
+
+
+    if(!list.length){
+
+        box.innerHTML =
+            "لا توجد تسجيلات لهذه المعلمة حتى الآن.";
+
+        return;
+
+    }
+
+
+    box.innerHTML =
+
+        list.map(
+
+            r =>
+
+            `
+            <div class="activity-item">
+
+                <strong>
+                    فصل ${escapeHTML(r.className)}
+                </strong>
+
+                — ${escapeHTML(r.criterion)}
+
+                <br>
+
+                <span>
+                    ${formatDate(r.createdAt)}
+                </span>
+
+            </div>
+            `
+
+        ).join("");
+
+}
+
+
+/* =========================================================
+   شاشة المنافسة
+========================================================= */
+
+function renderDashboard(){
+
+    const sorted =
+        CLASSES
+        .map(
+            className => ({
+                className,
+                points:
+                    getClassPoints(
+                        className
+                    )
+            })
+        )
+        .sort(
+            (a,b) =>
+                b.points -
+                a.points
+        );
+
+
+    const max =
+        getMaxPoints();
+
+
+    /* TOTAL */
+
+    document.getElementById(
+        "totalPoints"
+    ).textContent =
+        records.length;
+
+
+    /* STARTED */
+
+    document.getElementById(
+        "started"
+    ).textContent =
+
+        CLASSES.filter(
+            c =>
+                getClassPoints(c)>0
+        ).length;
+
+
+    /* LEADER */
+
+    document.getElementById(
+        "leader"
+    ).textContent =
+
+        sorted[0].points > 0
+        ? sorted[0].className
+        : "—";
+
+
+    /* TODAY */
+
+    document.getElementById(
+        "todayPoints"
+    ).textContent =
+
+        records.filter(
+            r =>
+                isToday(
+                    r.createdAt
+                )
+        ).length;
+
+
+    /* RANKING */
+
+    const rankList =
+        document.getElementById(
+            "rankList"
+        );
+
+
+    rankList.innerHTML =
+
+        sorted.map(
+
+            (item,index)=>{
+
+                const width =
+                    max === 0
+                    ? 0
+                    : Math.round(
+                        item.points /
+                        max *
+                        100
+                    );
+
+
+                let medal =
+                    "🏅";
+
+                if(index===0)
+                    medal="🥇";
+
+                if(index===1)
+                    medal="🥈";
+
+                if(index===2)
+                    medal="🥉";
+
+
+                let rankClass="";
+
+                if(index===0)
+                    rankClass="first";
+
+                if(index===1)
+                    rankClass="second";
+
+                if(index===2)
+                    rankClass="third";
+
+
+                return `
+
+                <div class="rank ${rankClass}">
+
+                    <div class="medal">
+                        ${medal}
+                    </div>
+
+                    <div class="class-name">
+                        ${item.className}
+                    </div>
+
+                    <div class="rank-bar">
+
+                        <div
+                            class="rank-fill"
+                            style="width:${width}%"
+                        ></div>
+
+                    </div>
+
+                    <div class="points">
+
+                        ${item.points}
+
+                        <small>
+                            نقطة
+                        </small>
+
+                    </div>
+
+                </div>
+
+                `;
+
+            }
+
+        ).join("");
+
+
+    /* CLASS CARDS */
+
+    const grid =
+        document.getElementById(
+            "classGrid"
+        );
+
+
+    grid.innerHTML =
+
+        sorted.map(
+
+            item => {
+
+                const width =
+                    max === 0
+                    ? 0
+                    : Math.round(
+                        item.points /
+                        max *
+                        100
+                    );
+
+
+                return `
+
+                <div class="class-card">
+
+                    <div class="class-header">
+
+                        <strong>
+                            فصل ${item.className}
+                        </strong>
+
+                        <span class="class-percent">
+
+                            ${width}%
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="mini-bar">
+
+                        <div
+                            class="mini-fill"
+                            style="
+                            width:${width}%;
+                            "
+                        ></div>
+
+                    </div>
+
+
+                    <div class="class-meta">
+
+                        <span>
+                            ${item.points}
+                            نقطة
+                        </span>
+
+                        <span>
+                            ${
+                                item.points === max &&
+                                max > 0
+                                ? "🔥 متصدر"
+                                : "مستمر"
+                            }
+                        </span>
+
+                    </div>
+
+                </div>
+
+                `;
+
+            }
+
+        ).join("");
+
+
+    /* ACTIVITY */
+
+    const activity =
+        document.getElementById(
+            "activity"
+        );
+
+
+    const recent =
+        records
+        .slice()
+        .reverse()
+        .slice(0,8);
+
+
+    if(!recent.length){
+
+        activity.innerHTML =
+            `<div class="activity-item">
+                لا توجد إنجازات حتى الآن.
+            </div>`;
+
+        return;
+
+    }
+
+
+    activity.innerHTML =
+
+        recent.map(
+
+            r =>
+
+            `
+            <div class="activity-item">
+
+                🔥
+
+                <strong>
+                    فصل ${escapeHTML(r.className)}
+                </strong>
+
+                حصل على نقطة
+
+                <strong>
+                    ${escapeHTML(r.criterion)}
+                </strong>
+
+                من
+
+                ${escapeHTML(r.teacherName)}
+
+                <br>
+
+                <span>
+                    ${formatDate(r.createdAt)}
+                </span>
+
+            </div>
+            `
+
+        ).join("");
+
+}
+
+
+/* =========================================================
+   الإدارة
+========================================================= */
+
+function renderAdmin(){
+
+    const sorted =
+        CLASSES
+        .map(
+            c => ({
+                className:c,
+                points:getClassPoints(c)
+            })
+        )
+        .sort(
+            (a,b) =>
+                b.points-a.points
+        );
+
+
+    document.getElementById(
+        "adminRows"
+    ).innerHTML =
+
+        sorted.map(
+
+            (item,index)=>
+
+            `
+            <tr>
+
+                <td>
+                    ${index+1}
+                </td>
+
+                <td>
+                    فصل ${item.className}
+                </td>
+
+                <td>
+                    ${item.points}
+                </td>
+
+                <td>
+                    ${getBarPercentage(
+                        item.points
+                    )}%
+                </td>
+
+            </tr>
+            `
+
+        ).join("");
+
+
+    const logs =
+        document.getElementById(
+            "logRows"
+        );
+
+
+    if(!records.length){
+
+        logs.innerHTML =
+
+            `
+            <tr>
+                <td colspan="4">
+                    لا توجد سجلات.
+                </td>
+            </tr>
+            `;
+
+        return;
+
+    }
+
+
+    logs.innerHTML =
+
+        records
+        .slice()
+        .reverse()
+        .map(
+
+            r =>
+
+            `
+            <tr>
+
+                <td>
+                    ${escapeHTML(
+                        r.teacherName
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        r.className
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        r.criterion
+                    )}
+                </td>
+
+                <td>
+                    ${formatDate(
+                        r.createdAt
+                    )}
+                </td>
+
+            </tr>
+            `
+
+        ).join("");
+
+}
+
+
+/* =========================================================
+   أسبوع جديد
+========================================================= */
+
+function newWeek(){
+
+    if(!records.length){
+
+        toast(
+            "لا توجد بيانات لحفظها."
+        );
+
+        return;
+
+    }
+
+
+    if(!confirm(
+        "سيتم أرشفة جميع نقاط هذا الأسبوع وتصغير المؤشر إلى صفر للأسبوع الجديد. هل أنتِ متأكدة؟"
+    )){
+
+        return;
+
+    }
+
+
+    const archive =
+        getArchive();
+
+
+    archive.push({
+
+        date:
+            new Date().toISOString(),
+
+        records:
+            [...records]
+
+    });
+
+
+    localStorage.setItem(
+
+        ARCHIVE_KEY,
+
+        JSON.stringify(
+            archive
+        )
+
+    );
+
+
+    records=[];
+
+
+    saveRecords();
+
+
+    render();
+
+
+    toast(
+        "بدأ أسبوع جديد 🎉"
+    );
+
+}
+
+
+/* =========================================================
+   Excel CSV
+========================================================= */
+
+function downloadCSV(){
+
+    let csv =
+        "\ufeffاسم المعلمة,الفصل,المعيار,التاريخ والوقت\n";
+
+
+    records.forEach(
+
+        r => {
+
+            csv +=
+
+                `"${csvSafe(r.teacherName)}",` +
+
+                `"${csvSafe(r.className)}",` +
+
+                `"${csvSafe(r.criterion)}",` +
+
+                `"${csvSafe(
+                    formatDate(
+                        r.createdAt
+                    )
+                )}"\n`;
+
+        }
+
+    );
+
+
+    downloadFile(
+
+        new Blob(
+            [csv],
+            {
+                type:
+                    "text/csv;charset=utf-8"
+            }
+        ),
+
+        "سجل_مؤشر_التميز.csv"
+
+    );
+
+}
+
+
+/* =========================================================
+   JSON BACKUP
+========================================================= */
+
+function downloadJSON(){
+
+    const data={
+
+        currentWeek:
+            records,
+
+        archive:
+            getArchive()
+
+    };
+
+
+    downloadFile(
+
+        new Blob(
+
+            [
+                JSON.stringify(
+                    data,
+                    null,
+                    2
+                )
+            ],
+
+            {
+                type:
+                    "application/json"
+            }
+
+        ),
+
+        "نسخة_احتياطية_مؤشر_التميز.json"
+
+    );
+
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function formatDate(value){
+
+    return new Date(
+        value
+    ).toLocaleString(
+        "ar-SA",
+        {
+            dateStyle:"short",
+            timeStyle:"short"
+        }
+    );
+
+}
+
+
+function csvSafe(value){
+
+    return String(
+        value ?? ""
+    ).replace(
+        /"/g,
+        '""'
+    );
+
+}
+
+
+function escapeHTML(value){
+
+    return String(
+        value ?? ""
+    ).replace(
+        /[&<>"']/g,
+        char => ({
+            "&":"&amp;",
+            "<":"&lt;",
+            ">":"&gt;",
+            '"':"&quot;",
+            "'":"&#039;"
+        })[char]
+    );
+
+}
+
+
+function downloadFile(
+    blob,
+    filename
+){
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+    link.href =
+        URL.createObjectURL(
+            blob
+        );
+
+    link.download =
+        filename;
+
+    link.click();
+
+    setTimeout(
+        () =>
+            URL.revokeObjectURL(
+                link.href
+            ),
+        500
+    );
+
+}
+
+
+function clearForm(){
+
+    document
+        .querySelectorAll(
+            'input[name="criterion"]'
+        )
+        .forEach(
+            input =>
+                input.checked=false
+        );
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function toast(message){
+
+    const element =
+        document.getElementById(
+            "toast"
+        );
+
+
+    element.textContent =
+        message;
+
+
+    element.style.display =
+        "block";
+
+
+    setTimeout(
+        () =>
+            element.style.display="none",
+        2500
+    );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+setup();
+
+</script>
+
+</body>
+</html>
