@@ -1048,14 +1048,50 @@ th{
 <div id="toast" class="toast"></div>
 
 
-<script>
+<script type="module">
+/* =========================================================
+   Firebase
+========================================================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    onSnapshot,
+    getDocs,
+    writeBatch,
+    doc,
+    setDoc,
+    getDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCoUfGhDGKeI4W8T1MOQAH7xb8dZ9wkhJo",
+    authDomain: "noha-7ad51.firebaseapp.com",
+    projectId: "noha-7ad51",
+    storageBucket: "noha-7ad51.firebasestorage.app",
+    messagingSenderId: "105565703988",
+    appId: "1:105565703988:web:9f61c7e064e70037101f61",
+    measurementId: "G-R0E41XYW0S"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const RECORDS_COLLECTION = "records";
+const ARCHIVE_COLLECTION = "archives";
+
+let records = [];
+let archive = [];
+let firebaseReady = false;
+let unsubscribeRecords = null;
 
 /* =========================================================
    أسماء المعلمات
 ========================================================= */
 
 const TEACHERS = [
-
     "فاطمه الملحم",
     "نهى المسلم",
     "آمنه الدهلي",
@@ -1084,1266 +1120,600 @@ const TEACHERS = [
     "بدرية المطيري",
     "غدير الدوسري",
     "فاطمة الفضيل"
-
 ];
-
 
 /* =========================================================
    الفصول
 ========================================================= */
 
 const CLASSES = [
-
-    "1/1",
-    "1/2",
-    "1/3",
-
-    "2/1",
-    "2/2",
-    "2/3",
-
-    "3/1",
-    "3/2",
-    "3/3"
-
+    "1/1", "1/2", "1/3",
+    "2/1", "2/2", "2/3",
+    "3/1", "3/2", "3/3"
 ];
-
 
 /* =========================================================
    المعايير
 ========================================================= */
 
 const CRITERIA = [
-
     "النظافة (الفصل + الشخصية)",
-
     "الانضباط (عدم الغياب)",
-
     "الحضور قبل الاصطفاف الصباحي",
-
     "ترديد النشيد الوطني",
-
     "الالتزام بالزي المدرسي والمظهر العام",
-
     "سلوكيات إيجابية (التعاون - الاحترام - المبادرة)",
-
     "الإذاعة الصباحية (مسابقة أجمل إذاعة)",
-
     "أفكار إبداعية داخل الفصل (مسابقة أجمل فصل)"
-
 ];
 
-
 /* =========================================================
-   التخزين
+   تشغيل الواجهة
 ========================================================= */
 
-const RECORDS_KEY =
-    "noura_jabr_competition_records_v1";
-
-const ARCHIVE_KEY =
-    "noura_jabr_competition_archive_v1";
-
-
-let records = loadRecords();
-
-
-function loadRecords(){
-
-    try{
-
-        const data =
-            JSON.parse(
-                localStorage.getItem(
-                    RECORDS_KEY
-                )
-            );
-
-        return Array.isArray(data)
-            ? data
-            : [];
-
-    }catch{
-
-        return [];
-
-    }
-
-}
-
-
-function saveRecords(){
-
-    localStorage.setItem(
-        RECORDS_KEY,
-        JSON.stringify(records)
-    );
-
-}
-
-
-function getArchive(){
-
-    try{
-
-        return JSON.parse(
-            localStorage.getItem(
-                ARCHIVE_KEY
-            )
-        ) || [];
-
-    }catch{
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================================================
-   تشغيل
-========================================================= */
-
-function setup(){
-
-    const teacherSelect =
-        document.getElementById(
-            "teacherName"
-        );
-
+function setup() {
+    const teacherSelect = document.getElementById("teacherName");
 
     teacherSelect.innerHTML =
-
-        `<option value="">
-            اختاري اسم المعلمة
-        </option>` +
-
+        `<option value="">اختاري اسم المعلمة</option>` +
         TEACHERS.map(
-
-            (name,index)=>
-
-            `<option value="${escapeHTML(name)}">
-                ${index+1}. ${escapeHTML(name)}
-            </option>`
-
+            (name, index) =>
+                `<option value="${escapeHTML(name)}">${index + 1}. ${escapeHTML(name)}</option>`
         ).join("");
 
+    document.getElementById("teacherClass").innerHTML =
+        CLASSES.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join("");
 
-    document.getElementById(
-        "teacherClass"
-    ).innerHTML =
-
-        CLASSES.map(
-
-            c =>
-
-            `<option value="${c}">
-                ${c}
-            </option>`
-
-        ).join("");
-
-
-    document.getElementById(
-        "criteria"
-    ).innerHTML =
-
+    document.getElementById("criteria").innerHTML =
         CRITERIA.map(
-
-            (criterion,index)=>
-
+            (criterion, index) => `
+                <label class="criterion">
+                    <input
+                        type="radio"
+                        name="criterion"
+                        value="${escapeHTML(criterion)}"
+                    >
+                    <span>${index + 1}. ${escapeHTML(criterion)}</span>
+                </label>
             `
-            <label class="criterion">
-
-                <input
-                    type="radio"
-                    name="criterion"
-                    value="${escapeHTML(criterion)}"
-                >
-
-                <span>
-                    ${index+1}.
-                    ${escapeHTML(criterion)}
-                </span>
-
-            </label>
-            `
-
         ).join("");
 
-
-    document
-        .getElementById("teacherClass")
-        .addEventListener(
-            "change",
-            updateTeacherScore
-        );
-
-
-    document
-        .getElementById("teacherName")
-        .addEventListener(
-            "change",
-            renderTeacherHistory
-        );
-
+    document.getElementById("teacherClass").addEventListener("change", updateTeacherScore);
+    document.getElementById("teacherName").addEventListener("change", renderTeacherHistory);
 
     render();
-
+    connectFirebase();
 }
 
+/* =========================================================
+   Firebase - المزامنة الحية
+========================================================= */
+
+function connectFirebase() {
+    try {
+        unsubscribeRecords = onSnapshot(
+            collection(db, RECORDS_COLLECTION),
+            (snapshot) => {
+                records = snapshot.docs.map(d => ({
+                    id: d.id,
+                    ...d.data()
+                }));
+
+                records.sort((a, b) =>
+                    String(a.createdAt || "").localeCompare(String(b.createdAt || ""))
+                );
+
+                firebaseReady = true;
+                render();
+            },
+            (error) => {
+                console.error("Firestore records error:", error);
+                firebaseReady = false;
+                toast("تعذر الاتصال بقاعدة البيانات");
+            }
+        );
+
+        loadArchive();
+    } catch (error) {
+        console.error("Firebase connection error:", error);
+        toast("حدث خطأ في الاتصال بـ Firebase");
+    }
+}
+
+async function loadArchive() {
+    try {
+        const snapshot = await getDocs(collection(db, ARCHIVE_COLLECTION));
+        archive = snapshot.docs.map(d => ({
+            id: d.id,
+            ...d.data()
+        }));
+
+        archive.sort((a, b) =>
+            String(b.date || "").localeCompare(String(a.date || ""))
+        );
+    } catch (error) {
+        console.error("Archive load error:", error);
+    }
+}
 
 /* =========================================================
    التنقل
 ========================================================= */
 
-function showScreen(id){
-
-    document
-        .querySelectorAll(".screen")
-        .forEach(
-            screen =>
-                screen.classList.remove("active")
-        );
-
-
-    document
-        .getElementById(id)
-        .classList.add("active");
-
-
-    render();
-
-}
-
-
-/* =========================================================
-   تسجيل
-========================================================= */
-
-function submitEntry(){
-
-    const teacher =
-        document.getElementById(
-            "teacherName"
-        ).value;
-
-
-    const className =
-        document.getElementById(
-            "teacherClass"
-        ).value;
-
-
-    const selected =
-        document.querySelector(
-            'input[name="criterion"]:checked'
-        );
-
-
-    if(!teacher){
-
-        toast("اختاري اسم المعلمة");
-
-        return;
-
-    }
-
-
-    if(!selected){
-
-        toast("اختاري معيارًا واحدًا");
-
-        return;
-
-    }
-
-
-    /*
-       لا يوجد منع للتكرار.
-
-       نفس المعيار يستطيع تسجيله:
-       أكثر من معلمة
-       وأكثر من مرة
-
-       وكل تسجيل = نقطة جديدة.
-    */
-
-
-    records.push({
-
-        id:
-            Date.now() +
-            "-" +
-            Math.random(),
-
-        teacherName:
-            teacher,
-
-        className:
-            className,
-
-        criterion:
-            selected.value,
-
-        createdAt:
-            new Date().toISOString()
-
+window.showScreen = function(id) {
+    document.querySelectorAll(".screen").forEach(screen => {
+        screen.classList.remove("active");
     });
 
-
-    saveRecords();
-
-
-    toast(
-        `تمت إضافة نقطة للفصل ${className} 🔥`
-    );
-
-
-    clearForm();
-
-
+    document.getElementById(id).classList.add("active");
     render();
+};
 
-}
+/* =========================================================
+   تسجيل نقطة
+========================================================= */
 
+window.submitEntry = async function() {
+    const teacher = document.getElementById("teacherName").value;
+    const className = document.getElementById("teacherClass").value;
+    const selected = document.querySelector('input[name="criterion"]:checked');
+
+    if (!teacher) {
+        toast("اختاري اسم المعلمة");
+        return;
+    }
+
+    if (!selected) {
+        toast("اختاري معيارًا واحدًا");
+        return;
+    }
+
+    if (!firebaseReady) {
+        toast("انتظري حتى يتصل الموقع بقاعدة البيانات");
+        return;
+    }
+
+    const entry = {
+        teacherName: teacher,
+        className: className,
+        criterion: selected.value,
+        createdAt: new Date().toISOString(),
+        createdAtServer: serverTimestamp()
+    };
+
+    try {
+        await addDoc(collection(db, RECORDS_COLLECTION), entry);
+
+        toast(`تمت إضافة نقطة للفصل ${className} 🔥`);
+        clearForm();
+    } catch (error) {
+        console.error("Add record error:", error);
+        toast("ما قدرنا نسجل النقطة، حاولي مرة ثانية");
+    }
+};
 
 /* =========================================================
    نقاط الفصل
 ========================================================= */
 
-function getClassPoints(className){
-
-    return records.filter(
-
-        record =>
-            record.className === className
-
-    ).length;
-
+function getClassPoints(className) {
+    return records.filter(record => record.className === className).length;
 }
-
 
 /* =========================================================
    نسبة البار
-   البار يقارن كل فصل بأعلى فصل
 ========================================================= */
 
-function getMaxPoints(){
-
-    return Math.max(
-
-        0,
-
-        ...CLASSES.map(
-            getClassPoints
-        )
-
-    );
-
+function getMaxPoints() {
+    return Math.max(0, ...CLASSES.map(getClassPoints));
 }
 
-
-function getBarPercentage(points){
-
-    const max =
-        getMaxPoints();
-
-
-    if(max === 0){
-
-        return 0;
-
-    }
-
-
-    return Math.round(
-        (points / max) * 100
-    );
-
+function getBarPercentage(points) {
+    const max = getMaxPoints();
+    if (max === 0) return 0;
+    return Math.round((points / max) * 100);
 }
-
 
 /* =========================================================
    نقاط اليوم
 ========================================================= */
 
-function isToday(date){
-
-    const d =
-        new Date(date);
-
-    const today =
-        new Date();
-
+function isToday(date) {
+    const d = new Date(date);
+    const today = new Date();
 
     return (
-
-        d.getFullYear() ===
-        today.getFullYear()
-
-        &&
-
-        d.getMonth() ===
-        today.getMonth()
-
-        &&
-
-        d.getDate() ===
-        today.getDate()
-
+        d.getFullYear() === today.getFullYear() &&
+        d.getMonth() === today.getMonth() &&
+        d.getDate() === today.getDate()
     );
-
 }
-
 
 /* =========================================================
    تحديث
 ========================================================= */
 
-function render(){
-
+function render() {
     renderTeacher();
-
     renderDashboard();
-
     renderAdmin();
-
 }
-
 
 /* =========================================================
    واجهة المعلمة
 ========================================================= */
 
-function renderTeacher(){
-
+function renderTeacher() {
     updateTeacherScore();
-
     renderTeacherHistory();
-
 }
 
+function updateTeacherScore() {
+    const className = document.getElementById("teacherClass").value;
+    const points = getClassPoints(className);
 
-function updateTeacherScore(){
-
-    const className =
-        document.getElementById(
-            "teacherClass"
-        ).value;
-
-
-    const points =
-        getClassPoints(
-            className
-        );
-
-
-    document.getElementById(
-        "currentPoints"
-    ).textContent =
-        points;
-
+    document.getElementById("currentPoints").textContent = points;
 }
 
+function renderTeacherHistory() {
+    const teacher = document.getElementById("teacherName").value;
+    const box = document.getElementById("teacherHistory");
 
-function renderTeacherHistory(){
-
-    const teacher =
-        document.getElementById(
-            "teacherName"
-        ).value;
-
-
-    const box =
-        document.getElementById(
-            "teacherHistory"
-        );
-
-
-    if(!teacher){
-
-        box.innerHTML =
-            "اختاري اسم المعلمة لعرض آخر تسجيلاتها.";
-
+    if (!teacher) {
+        box.innerHTML = "اختاري اسم المعلمة لعرض آخر تسجيلاتها.";
         return;
-
     }
 
-
-    const list =
-        records
-        .filter(
-            r =>
-                r.teacherName === teacher
-        )
+    const list = records
+        .filter(r => r.teacherName === teacher)
         .slice()
         .reverse()
-        .slice(0,10);
+        .slice(0, 10);
 
-
-    if(!list.length){
-
-        box.innerHTML =
-            "لا توجد تسجيلات لهذه المعلمة حتى الآن.";
-
+    if (!list.length) {
+        box.innerHTML = "لا توجد تسجيلات لهذه المعلمة حتى الآن.";
         return;
-
     }
 
-
-    box.innerHTML =
-
-        list.map(
-
-            r =>
-
-            `
-            <div class="activity-item">
-
-                <strong>
-                    فصل ${escapeHTML(r.className)}
-                </strong>
-
-                — ${escapeHTML(r.criterion)}
-
-                <br>
-
-                <span>
-                    ${formatDate(r.createdAt)}
-                </span>
-
-            </div>
-            `
-
-        ).join("");
-
+    box.innerHTML = list.map(r => `
+        <div class="activity-item">
+            <strong>فصل ${escapeHTML(r.className)}</strong>
+            — ${escapeHTML(r.criterion)}
+            <br>
+            <span>${formatDate(r.createdAt)}</span>
+        </div>
+    `).join("");
 }
-
 
 /* =========================================================
    شاشة المنافسة
 ========================================================= */
 
-function renderDashboard(){
+function renderDashboard() {
+    const sorted = CLASSES
+        .map(className => ({
+            className,
+            points: getClassPoints(className)
+        }))
+        .sort((a, b) => b.points - a.points);
 
-    const sorted =
-        CLASSES
-        .map(
-            className => ({
-                className,
-                points:
-                    getClassPoints(
-                        className
-                    )
-            })
-        )
-        .sort(
-            (a,b) =>
-                b.points -
-                a.points
-        );
+    const max = getMaxPoints();
 
+    document.getElementById("totalPoints").textContent = records.length;
 
-    const max =
-        getMaxPoints();
+    document.getElementById("started").textContent =
+        CLASSES.filter(c => getClassPoints(c) > 0).length;
 
+    document.getElementById("leader").textContent =
+        sorted[0].points > 0 ? sorted[0].className : "—";
 
-    /* TOTAL */
+    document.getElementById("todayPoints").textContent =
+        records.filter(r => isToday(r.createdAt)).length;
 
-    document.getElementById(
-        "totalPoints"
-    ).textContent =
-        records.length;
+    const rankList = document.getElementById("rankList");
 
+    rankList.innerHTML = sorted.map((item, index) => {
+        const width = max === 0 ? 0 : Math.round(item.points / max * 100);
 
-    /* STARTED */
+        let medal = "🏅";
+        if (index === 0) medal = "🥇";
+        if (index === 1) medal = "🥈";
+        if (index === 2) medal = "🥉";
 
-    document.getElementById(
-        "started"
-    ).textContent =
+        let rankClass = "";
+        if (index === 0) rankClass = "first";
+        if (index === 1) rankClass = "second";
+        if (index === 2) rankClass = "third";
 
-        CLASSES.filter(
-            c =>
-                getClassPoints(c)>0
-        ).length;
+        return `
+            <div class="rank ${rankClass}">
+                <div class="medal">${medal}</div>
+                <div class="class-name">${item.className}</div>
+                <div class="rank-bar">
+                    <div class="rank-fill" style="width:${width}%"></div>
+                </div>
+                <div class="points">
+                    ${item.points}
+                    <small>نقطة</small>
+                </div>
+            </div>
+        `;
+    }).join("");
 
+    const grid = document.getElementById("classGrid");
 
-    /* LEADER */
+    grid.innerHTML = sorted.map(item => {
+        const width = max === 0 ? 0 : Math.round(item.points / max * 100);
 
-    document.getElementById(
-        "leader"
-    ).textContent =
-
-        sorted[0].points > 0
-        ? sorted[0].className
-        : "—";
-
-
-    /* TODAY */
-
-    document.getElementById(
-        "todayPoints"
-    ).textContent =
-
-        records.filter(
-            r =>
-                isToday(
-                    r.createdAt
-                )
-        ).length;
-
-
-    /* RANKING */
-
-    const rankList =
-        document.getElementById(
-            "rankList"
-        );
-
-
-    rankList.innerHTML =
-
-        sorted.map(
-
-            (item,index)=>{
-
-                const width =
-                    max === 0
-                    ? 0
-                    : Math.round(
-                        item.points /
-                        max *
-                        100
-                    );
-
-
-                let medal =
-                    "🏅";
-
-                if(index===0)
-                    medal="🥇";
-
-                if(index===1)
-                    medal="🥈";
-
-                if(index===2)
-                    medal="🥉";
-
-
-                let rankClass="";
-
-                if(index===0)
-                    rankClass="first";
-
-                if(index===1)
-                    rankClass="second";
-
-                if(index===2)
-                    rankClass="third";
-
-
-                return `
-
-                <div class="rank ${rankClass}">
-
-                    <div class="medal">
-                        ${medal}
-                    </div>
-
-                    <div class="class-name">
-                        ${item.className}
-                    </div>
-
-                    <div class="rank-bar">
-
-                        <div
-                            class="rank-fill"
-                            style="width:${width}%"
-                        ></div>
-
-                    </div>
-
-                    <div class="points">
-
-                        ${item.points}
-
-                        <small>
-                            نقطة
-                        </small>
-
-                    </div>
-
+        return `
+            <div class="class-card">
+                <div class="class-header">
+                    <strong>فصل ${item.className}</strong>
+                    <span class="class-percent">${width}%</span>
                 </div>
 
-                `;
+                <div class="mini-bar">
+                    <div class="mini-fill" style="width:${width}%"></div>
+                </div>
 
-            }
-
-        ).join("");
-
-
-    /* CLASS CARDS */
-
-    const grid =
-        document.getElementById(
-            "classGrid"
-        );
-
-
-    grid.innerHTML =
-
-        sorted.map(
-
-            item => {
-
-                const width =
-                    max === 0
-                    ? 0
-                    : Math.round(
-                        item.points /
-                        max *
-                        100
-                    );
-
-
-                return `
-
-                <div class="class-card">
-
-                    <div class="class-header">
-
-                        <strong>
-                            فصل ${item.className}
-                        </strong>
-
-                        <span class="class-percent">
-
-                            ${width}%
-
-                        </span>
-
-                    </div>
-
-
-                    <div class="mini-bar">
-
-                        <div
-                            class="mini-fill"
-                            style="
-                            width:${width}%;
-                            "
-                        ></div>
-
-                    </div>
-
-
-                    <div class="class-meta">
-
-                        <span>
-                            ${item.points}
-                            نقطة
-                        </span>
-
-                        <span>
-                            ${
-                                item.points === max &&
-                                max > 0
+                <div class="class-meta">
+                    <span>${item.points} نقطة</span>
+                    <span>
+                        ${
+                            item.points === max && max > 0
                                 ? "🔥 متصدر"
                                 : "مستمر"
-                            }
-                        </span>
-
-                    </div>
-
+                        }
+                    </span>
                 </div>
+            </div>
+        `;
+    }).join("");
 
-                `;
+    const activity = document.getElementById("activity");
 
-            }
-
-        ).join("");
-
-
-    /* ACTIVITY */
-
-    const activity =
-        document.getElementById(
-            "activity"
-        );
-
-
-    const recent =
-        records
+    const recent = records
         .slice()
         .reverse()
-        .slice(0,8);
+        .slice(0, 8);
 
-
-    if(!recent.length){
-
-        activity.innerHTML =
-            `<div class="activity-item">
+    if (!recent.length) {
+        activity.innerHTML = `
+            <div class="activity-item">
                 لا توجد إنجازات حتى الآن.
-            </div>`;
-
+            </div>
+        `;
         return;
-
     }
 
-
-    activity.innerHTML =
-
-        recent.map(
-
-            r =>
-
-            `
-            <div class="activity-item">
-
-                🔥
-
-                <strong>
-                    فصل ${escapeHTML(r.className)}
-                </strong>
-
-                حصل على نقطة
-
-                <strong>
-                    ${escapeHTML(r.criterion)}
-                </strong>
-
-                من
-
-                ${escapeHTML(r.teacherName)}
-
-                <br>
-
-                <span>
-                    ${formatDate(r.createdAt)}
-                </span>
-
-            </div>
-            `
-
-        ).join("");
-
+    activity.innerHTML = recent.map(r => `
+        <div class="activity-item">
+            🔥
+            <strong>فصل ${escapeHTML(r.className)}</strong>
+            حصل على نقطة
+            <strong>${escapeHTML(r.criterion)}</strong>
+            من
+            ${escapeHTML(r.teacherName)}
+            <br>
+            <span>${formatDate(r.createdAt)}</span>
+        </div>
+    `).join("");
 }
-
 
 /* =========================================================
    الإدارة
 ========================================================= */
 
-function renderAdmin(){
+function renderAdmin() {
+    const sorted = CLASSES
+        .map(c => ({
+            className: c,
+            points: getClassPoints(c)
+        }))
+        .sort((a, b) => b.points - a.points);
 
-    const sorted =
-        CLASSES
-        .map(
-            c => ({
-                className:c,
-                points:getClassPoints(c)
-            })
-        )
-        .sort(
-            (a,b) =>
-                b.points-a.points
-        );
-
-
-    document.getElementById(
-        "adminRows"
-    ).innerHTML =
-
-        sorted.map(
-
-            (item,index)=>
-
-            `
+    document.getElementById("adminRows").innerHTML =
+        sorted.map((item, index) => `
             <tr>
-
-                <td>
-                    ${index+1}
-                </td>
-
-                <td>
-                    فصل ${item.className}
-                </td>
-
-                <td>
-                    ${item.points}
-                </td>
-
-                <td>
-                    ${getBarPercentage(
-                        item.points
-                    )}%
-                </td>
-
+                <td>${index + 1}</td>
+                <td>فصل ${item.className}</td>
+                <td>${item.points}</td>
+                <td>${getBarPercentage(item.points)}%</td>
             </tr>
-            `
+        `).join("");
 
-        ).join("");
+    const logs = document.getElementById("logRows");
 
-
-    const logs =
-        document.getElementById(
-            "logRows"
-        );
-
-
-    if(!records.length){
-
-        logs.innerHTML =
-
-            `
+    if (!records.length) {
+        logs.innerHTML = `
             <tr>
-                <td colspan="4">
-                    لا توجد سجلات.
-                </td>
+                <td colspan="4">لا توجد سجلات.</td>
             </tr>
-            `;
-
+        `;
         return;
-
     }
 
-
-    logs.innerHTML =
-
-        records
+    logs.innerHTML = records
         .slice()
         .reverse()
-        .map(
-
-            r =>
-
-            `
+        .map(r => `
             <tr>
-
-                <td>
-                    ${escapeHTML(
-                        r.teacherName
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        r.className
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        r.criterion
-                    )}
-                </td>
-
-                <td>
-                    ${formatDate(
-                        r.createdAt
-                    )}
-                </td>
-
+                <td>${escapeHTML(r.teacherName)}</td>
+                <td>${escapeHTML(r.className)}</td>
+                <td>${escapeHTML(r.criterion)}</td>
+                <td>${formatDate(r.createdAt)}</td>
             </tr>
-            `
-
-        ).join("");
-
+        `)
+        .join("");
 }
 
-
 /* =========================================================
-   أسبوع جديد
+   أسبوع جديد - أرشفة ثم حذف السجلات الحالية من Firestore
 ========================================================= */
 
-function newWeek(){
-
-    if(!records.length){
-
-        toast(
-            "لا توجد بيانات لحفظها."
-        );
-
+window.newWeek = async function() {
+    if (!records.length) {
+        toast("لا توجد بيانات لحفظها.");
         return;
-
     }
 
-
-    if(!confirm(
+    if (!confirm(
         "سيتم أرشفة جميع نقاط هذا الأسبوع وتصغير المؤشر إلى صفر للأسبوع الجديد. هل أنتِ متأكدة؟"
-    )){
-
+    )) {
         return;
-
     }
 
+    try {
+        const archiveId = `week_${Date.now()}`;
 
-    const archive =
-        getArchive();
+        await setDoc(doc(db, ARCHIVE_COLLECTION, archiveId), {
+            date: new Date().toISOString(),
+            records: records.map(r => ({
+                teacherName: r.teacherName,
+                className: r.className,
+                criterion: r.criterion,
+                createdAt: r.createdAt
+            }))
+        });
 
+        const snapshot = await getDocs(collection(db, RECORDS_COLLECTION));
 
-    archive.push({
+        let batch = writeBatch(db);
+        let count = 0;
 
-        date:
-            new Date().toISOString(),
+        for (const item of snapshot.docs) {
+            batch.delete(item.ref);
+            count++;
 
-        records:
-            [...records]
+            if (count === 450) {
+                await batch.commit();
+                batch = writeBatch(db);
+                count = 0;
+            }
+        }
 
-    });
+        if (count > 0) {
+            await batch.commit();
+        }
 
+        await loadArchive();
 
-    localStorage.setItem(
-
-        ARCHIVE_KEY,
-
-        JSON.stringify(
-            archive
-        )
-
-    );
-
-
-    records=[];
-
-
-    saveRecords();
-
-
-    render();
-
-
-    toast(
-        "بدأ أسبوع جديد 🎉"
-    );
-
-}
-
+        toast("بدأ أسبوع جديد 🎉");
+    } catch (error) {
+        console.error("New week error:", error);
+        toast("حدث خطأ أثناء بدء الأسبوع الجديد");
+    }
+};
 
 /* =========================================================
-   Excel CSV
+   CSV
 ========================================================= */
 
-function downloadCSV(){
-
+window.downloadCSV = function() {
     let csv =
         "\ufeffاسم المعلمة,الفصل,المعيار,التاريخ والوقت\n";
 
-
-    records.forEach(
-
-        r => {
-
-            csv +=
-
-                `"${csvSafe(r.teacherName)}",` +
-
-                `"${csvSafe(r.className)}",` +
-
-                `"${csvSafe(r.criterion)}",` +
-
-                `"${csvSafe(
-                    formatDate(
-                        r.createdAt
-                    )
-                )}"\n`;
-
-        }
-
-    );
-
+    records.forEach(r => {
+        csv +=
+            `"${csvSafe(r.teacherName)}",` +
+            `"${csvSafe(r.className)}",` +
+            `"${csvSafe(r.criterion)}",` +
+            `"${csvSafe(formatDate(r.createdAt))}"\n`;
+    });
 
     downloadFile(
-
-        new Blob(
-            [csv],
-            {
-                type:
-                    "text/csv;charset=utf-8"
-            }
-        ),
-
+        new Blob([csv], {
+            type: "text/csv;charset=utf-8"
+        }),
         "سجل_مؤشر_التميز.csv"
-
     );
-
-}
-
+};
 
 /* =========================================================
    JSON BACKUP
 ========================================================= */
 
-function downloadJSON(){
-
-    const data={
-
-        currentWeek:
-            records,
-
-        archive:
-            getArchive()
-
+window.downloadJSON = function() {
+    const data = {
+        currentWeek: records,
+        archive: archive
     };
 
-
     downloadFile(
-
         new Blob(
-
-            [
-                JSON.stringify(
-                    data,
-                    null,
-                    2
-                )
-            ],
-
-            {
-                type:
-                    "application/json"
-            }
-
+            [JSON.stringify(data, null, 2)],
+            { type: "application/json" }
         ),
-
         "نسخة_احتياطية_مؤشر_التميز.json"
-
     );
-
-}
-
+};
 
 /* =========================================================
    HELPERS
 ========================================================= */
 
-function formatDate(value){
+function formatDate(value) {
+    if (!value) return "—";
 
-    return new Date(
-        value
-    ).toLocaleString(
-        "ar-SA",
-        {
-            dateStyle:"short",
-            timeStyle:"short"
-        }
-    );
-
+    return new Date(value).toLocaleString("ar-SA", {
+        dateStyle: "short",
+        timeStyle: "short"
+    });
 }
 
-
-function csvSafe(value){
-
-    return String(
-        value ?? ""
-    ).replace(
-        /"/g,
-        '""'
-    );
-
+function csvSafe(value) {
+    return String(value ?? "").replace(/"/g, '""');
 }
 
-
-function escapeHTML(value){
-
-    return String(
-        value ?? ""
-    ).replace(
+function escapeHTML(value) {
+    return String(value ?? "").replace(
         /[&<>"']/g,
         char => ({
-            "&":"&amp;",
-            "<":"&lt;",
-            ">":"&gt;",
-            '"':"&quot;",
-            "'":"&#039;"
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
         })[char]
     );
-
 }
 
+function downloadFile(blob, filename) {
+    const link = document.createElement("a");
 
-function downloadFile(
-    blob,
-    filename
-){
-
-    const link =
-        document.createElement(
-            "a"
-        );
-
-    link.href =
-        URL.createObjectURL(
-            blob
-        );
-
-    link.download =
-        filename;
-
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
     link.click();
 
     setTimeout(
-        () =>
-            URL.revokeObjectURL(
-                link.href
-            ),
+        () => URL.revokeObjectURL(link.href),
         500
     );
-
 }
 
-
-function clearForm(){
-
+window.clearForm = function() {
     document
-        .querySelectorAll(
-            'input[name="criterion"]'
-        )
-        .forEach(
-            input =>
-                input.checked=false
-        );
+        .querySelectorAll('input[name="criterion"]')
+        .forEach(input => input.checked = false);
+};
 
-}
+function toast(message) {
+    const element = document.getElementById("toast");
 
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-function toast(message){
-
-    const element =
-        document.getElementById(
-            "toast"
-        );
-
-
-    element.textContent =
-        message;
-
-
-    element.style.display =
-        "block";
-
+    element.textContent = message;
+    element.style.display = "block";
 
     setTimeout(
-        () =>
-            element.style.display="none",
+        () => element.style.display = "none",
         2500
     );
-
 }
-
 
 /* =========================================================
    START
 ========================================================= */
 
 setup();
-
 </script>
 
 </body>
